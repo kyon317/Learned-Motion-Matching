@@ -6,11 +6,35 @@ This implementation includes custom training scripts in the `train/` folder, inc
 
 # Installation
 
-This demo uses [raylib](https://www.raylib.com/) and [raygui](https://github.com/raysan5/raygui) so you will need to first install those. Once installed, the demo itself is a pretty straight forward to make - just compile `controller.cpp`.
+## Prerequisites
 
-I've included a basic `Makefile` which you can use if you are using raylib on Windows. You may need to edit the paths in the `Makefile` but assuming default installation locations you can just run `Make`.
+This project requires the following dependencies:
 
-If you are on Linux or another platform you will probably have to hack this `Makefile` a bit.
+- **[raylib](https://www.raylib.com/)** - A simple and easy-to-use library for game development
+- **[raygui](https://github.com/raysan5/raygui)** - A simple and easy-to-use immediate-mode-gui library
+
+Please install these libraries according to their respective documentation before proceeding.
+
+## Building
+
+A `Makefile` is included for convenience. The build process varies by platform:
+
+### Windows
+
+1. Ensure raylib and raygui are installed in their default locations, or update the paths in the `Makefile` accordingly.
+2. Run:
+   ```bash
+   make
+   ```
+3. This will compile `controller.cpp` and produce the executable.
+
+### Linux / Other Platforms
+
+The provided `Makefile` is configured for Windows. For Linux or other platforms, you may need to modify the `Makefile` to match your system's raylib installation paths and compiler settings. Alternatively, you can compile directly:
+
+```bash
+gcc controller.cpp -o controller -lraylib -lraygui [additional flags as needed]
+```
 
 # Web Demo
 
@@ -49,6 +73,31 @@ To re-train the networks, follow these steps in order:
 
 All trained model files will be saved to the `resources/` directory and can be used directly with the C++ visualization program.
 
-The data required if you want to regenerate the animation database is from [this dataset](https://github.com/ubisoft/ubisoft-laforge-animation-dataset) which is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International Public License (unlike the code, which is licensed under MIT).
-
 If you re-generate the database you will also need to re-generate the matching database `features.bin`, which is done every time you re-run the demo. Similarly if you change the weights or any other properties that affect the matching the database will need to be re-generated and the networks re-trained.
+
+# Results
+
+The following visualizations demonstrate the motion matching results for different methods and motion types:
+
+## Learned Motion Matching (LMM)
+
+### Walking
+![LMM Walk](results/vis/lmm_walk.gif)
+
+### Running
+![LMM Run](results/vis/lmm_run.gif)
+
+## Diffusion-based Learned Motion Matching (DLMM)
+
+### Walking
+![DLMM Walk](results/vis/dlmm_walk.gif)
+
+### Running
+![DLMM Run](results/vis/dlmm_run.gif)
+# License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2021 Daniel Holden
+
+**Note:** The animation dataset used to generate the database is from [Ubisoft LaForge Animation Dataset](https://github.com/ubisoft/ubisoft-laforge-animation-dataset) and is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International Public License, which is separate from this code's MIT License.
