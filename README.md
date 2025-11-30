@@ -1,5 +1,14 @@
 # Motion Matching & Code vs Data Driven Displacement
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Language](https://img.shields.io/badge/language-C%2B%2B-orange.svg)](https://isocpp.org/)
+[![Python](https://img.shields.io/badge/python-3.x-blue.svg)](https://www.python.org/)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey.svg)](https://github.com)
+[![raylib](https://img.shields.io/badge/raylib-5.0-green.svg)](https://www.raylib.com/)
+[![Machine Learning](https://img.shields.io/badge/ML-Deep%20Learning-red.svg)](https://github.com)
+[![Web](https://img.shields.io/badge/web-Emscripten%20%7C%20WASM-purple.svg)](https://emscripten.org/)
+[![Research](https://img.shields.io/badge/research-Motion%20Matching-brightgreen.svg)](https://github.com)
+
 This repository contains my implementation of Learned Motion Matching, based on the original work described in [this article](https://theorangeduck.com/page/code-vs-data-driven-displacement) and [this paper](https://theorangeduck.com/page/learned-motion-matching). I also implemented a diffusion based network to replace the original Projector network, you can check details in the Training section.
 
 This implementation includes custom training scripts in the `train/` folder, including an alternative diffusion-based projector network, while maintaining full compatibility with the original C++ framework.
