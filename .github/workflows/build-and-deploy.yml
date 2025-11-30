@@ -60,8 +60,8 @@ jobs:
           PLATFORM ?= PLATFORM_DESKTOP
           RAYLIB_DIR ?= /tmp/raylib
           RAYLIB_LIB ?= $RAYLIB_LIB
-          INCLUDE_DIR = -I ./ -I \$(RAYLIB_DIR)/raylib/src -I \$(RAYLIB_DIR)/raygui/src
-          LIBRARY_DIR = -L \$(RAYLIB_DIR)/raylib/src
+          INCLUDE_DIR = -I ./ -I \$(RAYLIB_DIR)/src -I \$(RAYLIB_DIR)/raygui/src
+          LIBRARY_DIR = -L \$(RAYLIB_DIR)/build/raylib
           DEFINES = -D _DEFAULT_SOURCE -D RAYLIB_BUILD_MODE=\$(BUILD_MODE) -D \$(PLATFORM)
           
           ifeq (\$(PLATFORM),PLATFORM_WEB)
