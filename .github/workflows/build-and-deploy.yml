@@ -27,44 +27,61 @@ jobs:
       
       - name: Clone raylib and raygui
         run: |
-          git clone https://github.com/raysan5/raylib.git /tmp/raylib
-          git clone https://github.com/raysan5/raygui.git /tmp/raylib/raygui
+          git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib
+          git clone --depth 1 https://github.com/raysan5/raygui.git /tmp/raylib/raygui
       
-      - name: Build raylib for Emscripten
+      - name: Build raylib for Emscripten using CMake
         run: |
-          cd /tmp/raylib/src
-          emmake make PLATFORM=PLATFORM_WEB -j$(nproc)
+          cd /tmp/raylib
+          mkdir -p build
+          cd build
+          emcmake cmake .. -DPLATFORM=Web -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF
+          emmake make -j$(nproc)
+          # Find the built library
+          find . -name "*.bc" -o -name "*.a" | head -5
       
       - name: Build Web Demo
         env:
           RAYLIB_DIR: /tmp/raylib
         run: |
+          # Find the actual location of libraylib.bc or libraylib.a
+          RAYLIB_LIB=$(find /tmp/raylib/build -name "libraylib.bc" -o -name "libraylib.a" | head -1)
+          
+          if [ -z "$RAYLIB_LIB" ]; then
+            echo "Error: Could not find raylib library"
+            find /tmp/raylib -type f \( -name "*.bc" -o -name "*.a" \) | head -10
+            exit 1
+          fi
+          
+          echo "Found raylib library at: $RAYLIB_LIB"
+          
           # Create a temporary Makefile with Linux paths
-          cat > Makefile.linux << 'EOF'
+          cat > Makefile.linux << EOF
           PLATFORM ?= PLATFORM_DESKTOP
           RAYLIB_DIR ?= /tmp/raylib
-          INCLUDE_DIR = -I ./ -I $(RAYLIB_DIR)/raylib/src -I $(RAYLIB_DIR)/raygui/src
-          LIBRARY_DIR = -L $(RAYLIB_DIR)/raylib/src
-          DEFINES = -D _DEFAULT_SOURCE -D RAYLIB_BUILD_MODE=$(BUILD_MODE) -D $(PLATFORM)
+          RAYLIB_LIB ?= $RAYLIB_LIB
+          INCLUDE_DIR = -I ./ -I \$(RAYLIB_DIR)/raylib/src -I \$(RAYLIB_DIR)/raygui/src
+          LIBRARY_DIR = -L \$(RAYLIB_DIR)/raylib/src
+          DEFINES = -D _DEFAULT_SOURCE -D RAYLIB_BUILD_MODE=\$(BUILD_MODE) -D \$(PLATFORM)
           
-          ifeq ($(PLATFORM),PLATFORM_WEB)
+          ifeq (\$(PLATFORM),PLATFORM_WEB)
               CC = emcc
               EXT = .html
-              CFLAGS ?= $(DEFINES) $(RAYLIB_DIR)/raylib/src/libraylib.bc -ffast-math -D NDEBUG -O3 -s USE_GLFW=3 -s FORCE_FILESYSTEM=1 -s MAX_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1 --preload-file resources@resources --shell-file ./shell.html $(INCLUDE_DIR) $(LIBRARY_DIR)
+              CFLAGS ?= \$(DEFINES) \$(RAYLIB_LIB) -ffast-math -D NDEBUG -O3 -s USE_GLFW=3 -s FORCE_FILESYSTEM=1 -s MAX_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1 --preload-file resources@resources --shell-file ./shell.html \$(INCLUDE_DIR) \$(LIBRARY_DIR)
           endif
           
-          SOURCE = $(wildcard *.cpp)
-          HEADER = $(wildcard *.h)
+          SOURCE = \$(wildcard *.cpp)
+          HEADER = \$(wildcard *.h)
           
           .PHONY: all
           
           all: controller
           
-          controller: $(SOURCE) $(HEADER)
-          	$(CC) -o $@$(EXT) $(SOURCE) $(CFLAGS)
+          controller: \$(SOURCE) \$(HEADER)
+          	\$(CC) -o \$@\$(EXT) \$(SOURCE) \$(CFLAGS)
           
           clean:
-          	rm controller$(EXT)
+          	rm controller\$(EXT)
           EOF
           
           make -f Makefile.linux PLATFORM=PLATFORM_WEB
