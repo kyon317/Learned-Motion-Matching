@@ -11,6 +11,12 @@
 
 This repository contains my implementation of Learned Motion Matching, based on the original work described in [this article](https://theorangeduck.com/page/code-vs-data-driven-displacement) and [this paper](https://theorangeduck.com/page/learned-motion-matching). I also implemented a diffusion based network to replace the original Projector network, you can check details in the Training section.
 
+## 🎮 Live Demo
+
+[**Try the interactive web demo →**](https://kyon317.github.io/Motion-Matching/controller.html)
+
+The web demo runs entirely in your browser using WebAssembly. All pre-trained models are included, so you can interact with the motion matching system without any installation.
+
 This implementation includes custom training scripts in the `train/` folder, including an alternative diffusion-based projector network, while maintaining full compatibility with the original C++ framework.
 
 # Installation

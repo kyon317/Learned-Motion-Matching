@@ -1,0 +1,83 @@
+name: Build and Deploy Web Demo
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+      
+      - name: Set up Emscripten
+        uses: mymindstorm/setup-emsdk@v11
+        with:
+          version: 'latest'
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git cmake
+      
+      - name: Clone raylib and raygui
+        run: |
+          git clone https://github.com/raysan5/raylib.git /tmp/raylib
+          git clone https://github.com/raysan5/raygui.git /tmp/raylib/raygui
+      
+      - name: Build raylib for Emscripten
+        run: |
+          cd /tmp/raylib/src
+          emmake make PLATFORM=PLATFORM_WEB -j$(nproc)
+      
+      - name: Build Web Demo
+        env:
+          RAYLIB_DIR: /tmp/raylib
+        run: |
+          # Create a temporary Makefile with Linux paths
+          cat > Makefile.linux << 'EOF'
+          PLATFORM ?= PLATFORM_DESKTOP
+          RAYLIB_DIR ?= /tmp/raylib
+          INCLUDE_DIR = -I ./ -I $(RAYLIB_DIR)/raylib/src -I $(RAYLIB_DIR)/raygui/src
+          LIBRARY_DIR = -L $(RAYLIB_DIR)/raylib/src
+          DEFINES = -D _DEFAULT_SOURCE -D RAYLIB_BUILD_MODE=$(BUILD_MODE) -D $(PLATFORM)
+          
+          ifeq ($(PLATFORM),PLATFORM_WEB)
+              CC = emcc
+              EXT = .html
+              CFLAGS ?= $(DEFINES) $(RAYLIB_DIR)/raylib/src/libraylib.bc -ffast-math -D NDEBUG -O3 -s USE_GLFW=3 -s FORCE_FILESYSTEM=1 -s MAX_WEBGL_VERSION=2 -s ALLOW_MEMORY_GROWTH=1 --preload-file resources@resources --shell-file ./shell.html $(INCLUDE_DIR) $(LIBRARY_DIR)
+          endif
+          
+          SOURCE = $(wildcard *.cpp)
+          HEADER = $(wildcard *.h)
+          
+          .PHONY: all
+          
+          all: controller
+          
+          controller: $(SOURCE) $(HEADER)
+          	$(CC) -o $@$(EXT) $(SOURCE) $(CFLAGS)
+          
+          clean:
+          	rm controller$(EXT)
+          EOF
+          
+          make -f Makefile.linux PLATFORM=PLATFORM_WEB
+      
+      - name: Create docs directory
+        run: |
+          mkdir -p docs
+          cp controller.html controller.js controller.wasm controller.data docs/ 2>/dev/null || true
+          cp -r resources docs/
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          cname: false

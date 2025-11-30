@@ -1,10 +1,13 @@
 controller.exe
 controller.data
-controller.js
-controller.html
-controller.wasm
 *__pycache__*
 *.bvh
 *.log
 resources/runs*
 resources/difffusion*
+
+# Allow web build files in docs/ folder for GitHub Pages
+!docs/controller.js
+!docs/controller.html
+!docs/controller.wasm
+!docs/controller.data
