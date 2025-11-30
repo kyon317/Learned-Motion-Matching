@@ -4,7 +4,10 @@ controller.data
 *.bvh
 *.log
 resources/runs*
-resources/difffusion*
+
+# Allow binary model files (tracked by Git LFS)
+!resources/*.bin
+!resources/**/*.bin
 
 # Allow web build files in docs/ folder for GitHub Pages
 !docs/controller.js
